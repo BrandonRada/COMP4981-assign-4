@@ -1,1 +1,2 @@
-main src/main.cpp src/display.cpp include/display.hpp
+server src/main.c src/handleClient.c src/server.c src/sharedLibrary.c include/handleClient.h include/server.h include/sharedLibrary.h
+client src/client.c include/client.h

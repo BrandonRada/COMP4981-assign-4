@@ -45,7 +45,7 @@ done
 c_compilers=()
 while IFS= read -r line; do
     c_compilers+=("$line")
-done < "supported_cxx_compilers.txt"
+done < "supported_c_compilers.txt"
 
 # Loop through the C compilers array
 for c_compiler in "${c_compilers[@]}"; do

@@ -4,7 +4,7 @@
 set -e
 
 # Initialize the list of potential compilers
-cxx_compilers=("g++" "clang++" "g++13" "g++-13" "clang++-15" "clang++-16" "clang++-17" "clang++-18" "clang++15" "clang++16" "clang++17" "clang++18" "clang++-devel")
+c_compilers=("gcc" "clang" "gcc13" "gcc-13" "clang-15" "clang-16" "clang-17" "clang-18" "clang15" "clang16" "clang17" "clang18" "clang-devel")
 
 # Function to check if a compiler exists and add it to the supported list
 check_compiler()
@@ -36,6 +36,6 @@ check_compiler()
     fi
 }
 
-check_compiler "cxx_compilers" "${cxx_compilers[@]}"
+check_compiler "c_compilers" "${c_compilers[@]}"
 
 exit 0
