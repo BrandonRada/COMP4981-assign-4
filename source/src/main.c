@@ -24,7 +24,9 @@ static int sockfd;              // NOLINT(cppcoreguidelines-avoid-non-const-glob
 static int domain_socket_fd;    // Domain socket for IPC
 
 // Define function pointers for dynamic library loading
-void (*handle_request)(client_info *);
+static void (*handle_request)(client_info *);
+static void worker_process(int d_socket_fd);
+int         main(void);
 
 __attribute__((noreturn)) static void handle_sigint(int signal)
 {
@@ -35,10 +37,11 @@ __attribute__((noreturn)) static void handle_sigint(int signal)
 }
 
 // Worker process function
-void worker_process(int domain_socket_fd)
+void worker_process(int d_socket_fd)
 {
     struct sockaddr_in client_addr;
     socklen_t          client_len = sizeof(client_addr);
+    (void)d_socket_fd;
 
     for(;;)
     {
@@ -69,7 +72,7 @@ void worker_process(int domain_socket_fd)
         // Dynamically load the shared library if necessary
         if(dlopen("librequest_handler.so", RTLD_NOW))
         {
-            handle_request = dlsym(dlopen("librequest_handler.so", RTLD_NOW), "handle_request");
+            handle_request = (void (*)(client_info *))dlsym(dlopen("librequest_handler.so", RTLD_NOW), "handle_request");
             if(!handle_request)
             {
                 fprintf(stderr, "Failed to load request handler function: %s\n", dlerror());
@@ -91,6 +94,7 @@ void worker_process(int domain_socket_fd)
 int main(void)
 {
     struct sockaddr_in host_addr;
+    struct sockaddr_un domain_addr;
     int                opt = 1;
 
     // Create the main listening socket
@@ -131,7 +135,6 @@ int main(void)
     }
 
     // Create domain socket for IPC
-    struct sockaddr_un domain_addr;
     domain_socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(domain_socket_fd == -1)
     {
