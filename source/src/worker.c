@@ -45,15 +45,6 @@ void spawn_worker(int server_fd, int index)
     }
 }
 
-// void start_workers(int server_fd)
-//{
-//     for(int i = 0; i < NUM_WORKERS; ++i)
-//     {
-//         spawn_worker(server_fd, i);
-//     }
-//     monitor_workers(NUM_WORKERS);
-// }
-
 __attribute__((noreturn)) void start_workers(int server_fd)
 {
     global_server_fd = server_fd;    // Save so monitor_workers can use it
