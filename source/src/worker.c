@@ -14,6 +14,7 @@
 
 static pid_t worker_pids[NUM_WORKERS];    // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 void         spawn_worker(int server_fd, int index);
+static int   global_server_fd = -1;    // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
 void spawn_worker(int server_fd, int index)
 {
@@ -55,6 +56,7 @@ void spawn_worker(int server_fd, int index)
 
 __attribute__((noreturn)) void start_workers(int server_fd)
 {
+    global_server_fd = server_fd;    // Save so monitor_workers can use it
     for(int i = 0; i < NUM_WORKERS; ++i)
     {
         spawn_worker(server_fd, i);
@@ -63,7 +65,7 @@ __attribute__((noreturn)) void start_workers(int server_fd)
 
     while(1)
     {
-        sleep(1);    // Prevent returning
+        sleep(1);
     }
 }
 
@@ -80,7 +82,7 @@ __attribute__((noreturn)) void monitor_workers(int num_workers)
                 if(worker_pids[i] == pid)
                 {
                     fprintf(stderr, "Worker %d (PID %d) died, restarting...\n", i, pid);
-                    spawn_worker(worker_pids[0], i);    // assumes server_fd is preserved
+                    spawn_worker(global_server_fd, i);    // assumes server_fd is preserved
                     break;
                 }
             }
