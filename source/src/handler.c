@@ -70,7 +70,7 @@ int handle_request(int client_fd)
 
 static void handle_post(int client_fd, const char *body)
 {
-    DBM *db = dbm_open("data_store", O_RDWR | O_CREAT, DATABASE_PERMISSION);
+    DBM *db = dbm_open("data/data_store", O_RDWR | O_CREAT, DATABASE_PERMISSION);
     if(!db)
     {
         dprintf(client_fd, "HTTP/1.1 500 Internal Server Error\r\n\r\n");

@@ -34,7 +34,7 @@ void handle_post(int client_fd, const char *body)
     // Copy body into mutable buffer (strtok_r modifies input)
     char body_copy[MAX_REQUEST];
 
-    db_filename = "data_store";
+    db_filename = "../data/data_store";
 
     strncpy(body_copy, body, sizeof(body_copy) - 1);
     body_copy[sizeof(body_copy) - 1] = '\0';

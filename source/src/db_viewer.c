@@ -44,7 +44,7 @@ void print_db_entries(const char *db_path)
 
 int main(int argc, char *argv[])
 {
-    const char *db_path = "../data/db/post_data.db";    // default
+    const char *db_path = "../data/data_store";    // default
 
     if(argc == 2)
     {

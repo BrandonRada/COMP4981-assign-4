@@ -10,7 +10,7 @@
 
 int handle_post_request(int client_fd, const HTTPRequest *req, const char *body)
 {
-    DBM *db = dbm_open("data_store", O_RDWR | O_CREAT, 0666);
+    DBM *db = dbm_open("../data/data_store", O_RDWR | O_CREAT, 0666);
     if (!db) {
         dprintf(client_fd, "HTTP/1.1 500 Internal Server Error\r\n\r\n");
         return -1;
