@@ -2,19 +2,22 @@
 // Created by brandon-rada on 4/9/25.
 //
 #include <arpa/inet.h>
+#include <errno.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#define SERVER_PORT 8080
-#define SERVER_ADDR "127.0.0.1"
 #define BUFFER_SIZE 4096
+#define MIN_ARGS 5
+#define BODY_ARG_INDEX 5
+#define MAX_PORT 65535
+#define TEN 10
 
-void send_request(const char *method, const char *path, const char *body);
+void send_request(const char *ip, int port, const char *method, const char *path, const char *body);
 
-void send_request(const char *method, const char *path, const char *body)
+void send_request(const char *ip, int port, const char *method, const char *path, const char *body)
 {
     int                sockfd;
     struct sockaddr_in server_addr;
@@ -22,7 +25,6 @@ void send_request(const char *method, const char *path, const char *body)
     char               response[BUFFER_SIZE];
     ssize_t            bytes_received;
 
-    // Create socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd < 0)
     {
@@ -30,13 +32,17 @@ void send_request(const char *method, const char *path, const char *body)
         exit(EXIT_FAILURE);
     }
 
-    // Server address
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port   = htons(SERVER_PORT);
-    inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
+    server_addr.sin_port   = htons((uint16_t)port);
 
-    // Connect to server
+    if(inet_pton(AF_INET, ip, &server_addr.sin_addr) <= 0)
+    {
+        perror("inet_pton");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+
     if(connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
     {
         perror("connect");
@@ -44,19 +50,21 @@ void send_request(const char *method, const char *path, const char *body)
         exit(EXIT_FAILURE);
     }
 
-    // Prepare HTTP request
+    // Build HTTP request
     if(strcmp(method, "POST") == 0)
     {
         snprintf(request,
                  sizeof(request),
                  "%s %s HTTP/1.1\r\n"
-                 "Host: localhost\r\n"
+                 "Host: %s:%d\r\n"
                  "Content-Type: application/x-www-form-urlencoded\r\n"
                  "Content-Length: %zu\r\n"
                  "\r\n"
                  "%s",
                  method,
                  path,
+                 ip,
+                 port,
                  strlen(body),
                  body);
     }
@@ -65,16 +73,15 @@ void send_request(const char *method, const char *path, const char *body)
         snprintf(request,
                  sizeof(request),
                  "%s %s HTTP/1.1\r\n"
-                 "Host: localhost\r\n"
+                 "Host: %s:%d\r\n"
                  "\r\n",
                  method,
-                 path);
+                 path,
+                 ip,
+                 port);
     }
 
-    // Send request
     send(sockfd, request, strlen(request), 0);
-
-    // Read and print response
 
     while((bytes_received = recv(sockfd, response, sizeof(response) - 1, 0)) > 0)
     {
@@ -87,20 +94,37 @@ void send_request(const char *method, const char *path, const char *body)
 
 int main(int argc, char *argv[])
 {
-    const char *method = argv[1];
-    const char *path   = argv[2];
-    const char *body   = (argc > 3) ? argv[3] : "";
+    const char *ip;
+    char       *endptr;
+    long        port_long;
+    int         port;
+    const char *method;
+    const char *path;
+    const char *body;
 
-    if(argc < 3)
+    if(argc < MIN_ARGS)
     {
-        printf("Usage:\n");
-        printf("  %s METHOD PATH [BODY]\n", argv[0]);
-        printf("Examples:\n");
-        printf("  %s GET /index.html\n", argv[0]);
-        printf("  %s POST / \"username=chatgpt\"\n", argv[0]);
+        fprintf(stderr, "Usage:\n");
+        fprintf(stderr, "  %s <IP> <PORT> <METHOD> <PATH> [BODY]\n", argv[0]);
+        fprintf(stderr, "Example:\n");
+        fprintf(stderr, "  %s 127.0.0.1 8080 POST / \"username=brandon\"\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    send_request(method, path, body);
+    ip = argv[1];
+
+    port_long = strtol(argv[2], &endptr, TEN);
+    if(*endptr != '\0' || port_long <= 0 || port_long > MAX_PORT)
+    {
+        fprintf(stderr, "Invalid port number: %s\n", argv[2]);
+        return EXIT_FAILURE;
+    }
+    port = (int)port_long;
+
+    method = argv[3];
+    path   = argv[4];
+    body   = (argc >= BODY_ARG_INDEX + 1) ? argv[BODY_ARG_INDEX] : "";
+
+    send_request(ip, port, method, path, body);
     return EXIT_SUCCESS;
 }
