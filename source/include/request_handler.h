@@ -7,4 +7,4 @@
 
 int handle_request(int client_fd);
 
-#endif //REQUEST_HANDLER_H
+#endif    // REQUEST_HANDLER_H

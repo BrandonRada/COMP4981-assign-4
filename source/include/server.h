@@ -7,4 +7,4 @@
 
 void start_workers(int server_fd);
 
-#endif //SERVER_H
+#endif    // SERVER_H
