@@ -52,6 +52,13 @@ static void serve_file(int client_fd, const char *path, int head_only)
 
     snprintf(fullpath, sizeof(fullpath), "%s/%s", WEBROOT, path);
 
+    if (strstr(path, "..") != NULL)
+    {
+        dprintf(client_fd, "HTTP/1.1 403 Forbidden\r\n\r\n");
+        return;
+    }
+
+
     // Resolve the absolute path
     if (realpath(fullpath, resolved_path) == NULL) {
         perror("realpath error");
@@ -59,13 +66,6 @@ static void serve_file(int client_fd, const char *path, int head_only)
         return;
     }
     printf("Resolved Path: %s\n", resolved_path);
-
-
-    // Ensure resolved_path starts with WEBROOT to prevent traversal
-    if (strncmp(resolved_path, WEBROOT, strlen(WEBROOT)) != 0) {
-        dprintf(client_fd, "HTTP/1.1 403 Forbidden\r\n\r\n");
-        return;
-    }
 
     int fd = open(resolved_path, O_RDONLY);
     if(fd < 0)
