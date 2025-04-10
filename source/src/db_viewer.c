@@ -59,7 +59,7 @@ void print_db_entries(const char *db_path)
     dbm_close(db);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
     const char *db_path = "data/data_store";    // default
 
