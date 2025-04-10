@@ -98,6 +98,11 @@ static void serve_file(int client_fd, const char *path, int head_only)
     char fullpath[FULL_PATH_LENGTH];
     snprintf(fullpath, sizeof(fullpath), "%s/%s", WEBROOT, path);
 
+    if (strstr(path, "..") != NULL) {
+        dprintf(client_fd, "HTTP/1.1 403 Forbidden\r\n\r\n");
+        return;
+    }
+
     int fd = open(fullpath, O_RDONLY);
     if(fd < 0)
     {
