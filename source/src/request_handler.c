@@ -39,7 +39,11 @@ void handle_post(int client_fd, const char *body)
     strncpy(body_copy, body, sizeof(body_copy) - 1);
     body_copy[sizeof(body_copy) - 1] = '\0';
 
-    db = dbm_open(db_filename, O_RDWR | O_CREAT, DATABASE_PERMISSION);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
+    db = dbm_open((char *)db_filename, O_RDWR | O_CREAT, DATABASE_PERMISSION);
+#pragma clang diagnostic pop
+
     if(!db)
     {
         dprintf(client_fd, "HTTP/1.1 500 Internal Server Error\r\n\r\n");
