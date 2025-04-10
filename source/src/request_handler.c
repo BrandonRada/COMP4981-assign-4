@@ -78,12 +78,6 @@ void serve_file(int client_fd, const char *path, int head_only)
     struct stat st;
     int         fd;
 
-    // Security check: Reject paths that contain ".."
-    if (strstr(path, "..") != NULL) {
-        dprintf(client_fd, "HTTP/1.1 403 Forbidden\r\n\r\n");
-        return;
-    }
-
     snprintf(fullpath, sizeof(fullpath), "%s/%s", WEBROOT, path);
 
     fd = open(fullpath, O_RDONLY | O_CLOEXEC);
