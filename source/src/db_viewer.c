@@ -11,11 +11,6 @@ void print_db_entries(const char *db_path);
 
 void print_db_entries(const char *db_path)
 {
-    // #pragma clang diagnostic push
-    // #pragma clang diagnostic ignored "-Wcast-qual"
-    //     DBM *db = dbm_open((char *)db_path, O_RDONLY, 0);
-    // #pragma clang diagnostic pop
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"    // aggregate-return
     DBM *db = dbm_open((char *)db_path, O_RDONLY, 0);
@@ -34,14 +29,14 @@ void print_db_entries(const char *db_path)
 #pragma GCC diagnostic ignored "-Waggregate-return"
     key = dbm_firstkey(db);
 #pragma GCC diagnostic pop
-    // key = dbm_firstkey(db);
+
     while(key.dptr != NULL)
     {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Waggregate-return"
         datum value = dbm_fetch(db, key);
 #pragma GCC diagnostic pop
-        // datum value = dbm_fetch(db, key);
+
         if(value.dptr != NULL)
         {
             printf("Key: %.*s\n", key.dsize, key.dptr);
@@ -53,7 +48,6 @@ void print_db_entries(const char *db_path)
 #pragma GCC diagnostic ignored "-Waggregate-return"
         key = dbm_nextkey(db);
 #pragma GCC diagnostic pop
-        // key = dbm_nextkey(db);
     }
 
     dbm_close(db);
