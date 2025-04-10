@@ -19,6 +19,7 @@
 #define PATH_LENGTH 256
 #define FULL_PATH_LENGTH 512
 #define DATABASE_PERMISSION 0666
+#define Perm 0755
 
 static void handle_post(int client_fd, const char *body)
 {
@@ -61,7 +62,6 @@ static void serve_file(int client_fd, const char *path, int head_only)
 
     // Resolve the absolute path
     if (realpath(fullpath, resolved_path) == NULL) {
-        perror("realpath error");
         dprintf(client_fd, "HTTP/1.1 404 Not Found\r\n\r\n");
         return;
     }
@@ -104,10 +104,16 @@ int handle_request(int client_fd)
     char method[METHOD_LENGTH];
     char path[PATH_LENGTH];
     const char *trimmed_path;
-
+    struct stat st = {0};
     ssize_t len = read(client_fd, buffer, sizeof(buffer) - 1);
     if(len <= 0)
         return -1;
+
+    if(stat("data", &st) == -1 && mkdir("data", Perm) == -1)
+    {
+        perror("mkdir data");
+        exit(EXIT_FAILURE);
+    }
 
     buffer[len] = '\0';
     sscanf(buffer, "%7s %255s", method, path);

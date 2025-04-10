@@ -19,7 +19,9 @@
 #endif
 
 #define PORT 8080
+
 #define BACKLOG 10
+#define Perm 0755
 #define SOURCE_FILE "src/handler.c"
 #define LIBRARY_FILE "lib/handler.so"
 #define COMPILE_CMD "gcc -fPIC -shared -o " LIBRARY_FILE " " SOURCE_FILE
@@ -49,6 +51,13 @@ static void check_and_recompile(void)
 {
     static time_t last_modified = 0;
     struct stat   file_stat;
+    struct stat   st = {0};
+
+    if(stat("lib", &st) == -1 && mkdir("lib", Perm) == -1)
+    {
+        perror("mkdir lib");
+        exit(EXIT_FAILURE);
+    }
 
     if(stat(SOURCE_FILE, &file_stat) == 0 && file_stat.st_mtime > last_modified)
     {
@@ -79,6 +88,7 @@ int main(void)
 
     // Set up signal handler
     signal(SIGINT, sigint_handler);
+
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if(server_fd == -1)
     {
