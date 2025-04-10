@@ -20,6 +20,7 @@ void send_request(const char *method, const char *path, const char *body)
     struct sockaddr_in server_addr;
     char               request[BUFFER_SIZE];
     char               response[BUFFER_SIZE];
+    ssize_t            bytes_received;
 
     // Create socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -74,7 +75,7 @@ void send_request(const char *method, const char *path, const char *body)
     send(sockfd, request, strlen(request), 0);
 
     // Read and print response
-    ssize_t bytes_received;
+
     while((bytes_received = recv(sockfd, response, sizeof(response) - 1, 0)) > 0)
     {
         response[bytes_received] = '\0';
@@ -86,6 +87,10 @@ void send_request(const char *method, const char *path, const char *body)
 
 int main(int argc, char *argv[])
 {
+    const char *method = argv[1];
+    const char *path   = argv[2];
+    const char *body   = (argc > 3) ? argv[3] : "";
+
     if(argc < 3)
     {
         printf("Usage:\n");
@@ -95,10 +100,6 @@ int main(int argc, char *argv[])
         printf("  %s POST / \"username=chatgpt\"\n", argv[0]);
         return EXIT_FAILURE;
     }
-
-    const char *method = argv[1];
-    const char *path   = argv[2];
-    const char *body   = (argc > 3) ? argv[3] : "";
 
     send_request(method, path, body);
     return EXIT_SUCCESS;
