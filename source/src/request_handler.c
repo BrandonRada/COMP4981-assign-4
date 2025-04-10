@@ -39,10 +39,15 @@ void handle_post(int client_fd, const char *body)
     strncpy(body_copy, body, sizeof(body_copy) - 1);
     body_copy[sizeof(body_copy) - 1] = '\0';
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
     db = dbm_open((char *)db_filename, O_RDWR | O_CREAT, DATABASE_PERMISSION);
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
+
+    // #pragma clang diagnostic push
+    // #pragma clang diagnostic ignored "-Wcast-qual"
+    //     db = dbm_open((char *)db_filename, O_RDWR | O_CREAT, DATABASE_PERMISSION);
+    // #pragma clang diagnostic pop
 
     if(!db)
     {

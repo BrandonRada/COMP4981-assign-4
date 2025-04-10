@@ -44,13 +44,27 @@ void spawn_worker(int server_fd, int index)
     }
 }
 
-void start_workers(int server_fd)
+// void start_workers(int server_fd)
+//{
+//     for(int i = 0; i < NUM_WORKERS; ++i)
+//     {
+//         spawn_worker(server_fd, i);
+//     }
+//     monitor_workers(NUM_WORKERS);
+// }
+
+__attribute__((noreturn)) void start_workers(int server_fd)
 {
     for(int i = 0; i < NUM_WORKERS; ++i)
     {
         spawn_worker(server_fd, i);
     }
     monitor_workers(NUM_WORKERS);
+
+    while(1)
+    {
+        sleep(1);    // Prevent returning
+    }
 }
 
 __attribute__((noreturn)) void monitor_workers(int num_workers)
